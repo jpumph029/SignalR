@@ -22,20 +22,17 @@ namespace GroupChat
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
        
-            app.UseSignalR(routes =>
-            {
-                routes.MapHub<Chat>("/chat");
-            });
-
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
             }
 
-            app.Run(async (context) =>
+            app.UseSignalR(routes =>
             {
-                await context.Response.WriteAsync("Hello World!");
+                routes.MapHub<Chat>("/chat");
             });
+
+            app.UseFileServer();
         }
     }
 }
