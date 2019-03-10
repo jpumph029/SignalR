@@ -7,10 +7,10 @@
     <meta http-equiv="Expires" content="0" />
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/dist/css/bootstrap.min.css" rel="stylesheet" />
     <link href="css/site.css" rel="stylesheet" />
-    <title>Azure SignalR Group Chat</title>
+    <title>ManaMessaging</title>
 </head>
 <body>
-    <h2 class="text-center" style="margin-top: 0; padding-top: 30px; padding-bottom: 30px;">Azure SignalR Group Chat</h2>
+    <h2 class="text-center" style="margin-top: 0; padding-top: 30px; padding-bottom: 30px;">Group Chat</h2>
     <div class="container" style="height: calc(100% - 110px);">
         <div id="messages" style="background-color: whitesmoke; "></div>
         <div style="width: 100%; border-left-style: ridge; border-right-style: ridge;">
@@ -81,29 +81,22 @@
             }
 
             function bindConnectionMessage(connection) {
-            var messageCallback = function (name, message) {
-                if (!message) return;
-                // deal with the message
-                    alert("message received:" + message);
+                var messageCallback = function(name, message) {
+                    if (!message) return;
+                    // Html encode display name and message.
+                    var encodedName = name;
+                    var encodedMsg = message.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+                    var messageEntry = createMessageEntry(encodedName, encodedMsg);
+                                
+                    var messageBox = document.getElementById('messages');
+                    messageBox.appendChild(messageEntry);
+                    messageBox.scrollTop = messageBox.scrollHeight;
                 };
                 // Create a function that the hub can call to broadcast messages.
                 connection.on('broadcastMessage', messageCallback);
                 connection.on('echo', messageCallback);
+                connection.onclose(onConnectionError);
             }
-            
-            var connection = new signalR.HubConnectionBuilder()
-                .withUrl('/chat')
-                .build();
-            
-            bindConnectionMessage(connection);
-            connection.start()
-                .then(function () {
-                    onConnected(connection);
-                })
-                .catch(function (error) {
-                    console.error(error.message);
-                });       
-          
 
             function onConnected(connection) {
                 console.log('connection started');
